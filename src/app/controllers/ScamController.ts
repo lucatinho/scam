@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
 import axios from "axios";
 import cheerio from 'cheerio';
-import {Locais} from "../../shared/utils/sites.utils";
+import {Locais} from "../../shared/utils/locais.utils";
 
 interface RealEstateOffer {
     neighborhood: string;
