@@ -1,7 +1,7 @@
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
-import rastreiosRoutes from "./routes/RastreiosRoutes";
+import scamRoutes from "./routes/ScamRoutes";
 
 import * as dotenv from 'dotenv';
 
@@ -26,7 +26,7 @@ class App {
 
     private routes(): void {
         this.express.use([
-            rastreiosRoutes
+            scamRoutes
         ]);
     }
 }
