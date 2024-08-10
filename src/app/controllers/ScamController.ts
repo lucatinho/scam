@@ -1,21 +1,15 @@
 import {Request, Response} from "express";
 import axios from "axios";
 import cheerio from 'cheerio';
-import {Locais} from "../../shared/utils/locais.utils";
 
-interface RealEstateOffer {
-    neighborhood: string;
-    info: string;
-    price: string;
-    link: string;
-    type: string;
-    date: Date;
-}
+import {Locais} from "../../shared/utils/locais.utils";
+import {IRealEstateOffer} from "../../shared/interfaces/IRealEstateOffer.interface";
+
 
 class ScamController {
     public async scam(req: Request, res: Response): Promise<any> {
         try {
-            const offers: RealEstateOffer[] = [];
+            const offers: IRealEstateOffer[] = [];
             for (const site of Locais.AllSites) {
                 const url = site.url;
                 const response = await axios.get(url);
@@ -26,7 +20,7 @@ class ScamController {
                 $('.box-result-properties').each((index, element) => {
                     const neighborhood = $(element).find(site.classes.neighborhood).text();
                     const info = $(element).find(site.classes.info).text();
-                    const price = $(element).find(site.classes.price).text();
+                    const price = Formatacao.formatarValor($(element).find(site.classes.price).text());
                     const link = $(element).find(site.classes.link).attr('href');
 
                     offers.push({
@@ -44,6 +38,16 @@ class ScamController {
         } catch (err) {
             return res.status(400).send({error: 'Erro interno'});
         }
+    }
+}
+
+export class Formatacao {
+    static formatarValor(value: string): string {
+        value = value.replace('VendaR$', '');
+        value = value.replace(/\./g, '');
+        value = value.replace(/\s/g, '');
+        value = value.split('LocaçãoR$', 1)[0];
+        return value;
     }
 }
 
