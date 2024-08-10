@@ -46,6 +46,7 @@ export class Formatacao {
         value = value.replace('VendaR$', '');
         value = value.replace(/\./g, '');
         value = value.replace(/\s/g, '');
+        value = value.replace(',', '.');
         value = value.split('LocaçãoR$', 1)[0];
         return value;
     }
