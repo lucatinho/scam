@@ -35,8 +35,9 @@ class ScamController {
     public async landelScam(req: Request, res: Response): Promise<any> {
         try {
             const offers: IRealEstateOffer[] = [];
-            await Scam.LandelInfo(Terrenos.Landel, offers);
-            await Scam.LandelInfo(Casas.Landel, offers);
+            await Scam.ApiInfo(Terrenos.Landel, offers);
+            await Scam.ApiInfo(Casas.Landel, offers);
+            // await Scam.ApiInfo(Casas.SiImoveis, offers);
 
             return res.status(200).send({offers});
         } catch (err) {
@@ -49,8 +50,9 @@ export class Scam {
     static async PegarInfoAllsites() {
         const offers: IRealEstateOffer[] = [];
         await Scam.PegarInfoChaveDeOuro(offers);
-        await Scam.LandelInfo(Terrenos.Landel, offers);
-        await Scam.LandelInfo(Casas.Landel, offers);
+        await Scam.ApiInfo(Terrenos.Landel, offers);
+        await Scam.ApiInfo(Casas.Landel, offers);
+        await Scam.ApiInfo(Casas.SiImoveis, offers);
         for (const site of Locais.AllSites) {
             const $ = await this.PegarPaginaRequest(site.url);
             await this.PegarInfo($, site, offers);
@@ -59,7 +61,7 @@ export class Scam {
         return offers;
     }
 
-    static async LandelInfo(site: Sites, offers: IRealEstateOffer[]) {
+    static async ApiInfo(site: Sites, offers: IRealEstateOffer[]) {
         let loop = true
         let pageNumber = 1
 
@@ -72,7 +74,7 @@ export class Scam {
                         neighborhood: element.neighborhood,
                         info: element?.area[0],
                         price: element?.sale_price[0],
-                        link: `${Terrenos.Landel.urlBase}${element.url}`,
+                        link: `${site.urlBase}${element.url}`,
                         type: site.type,
                         date: new Date(),
                     });
@@ -93,9 +95,6 @@ export class Scam {
             await this.PegarInfo($, site, offers, true);
             await this.VerificarPaginasChaveDeOuro($, site, offers);
         }
-        const $ = await this.PegarPaginaRequest(Casas.ChaveDeOuro.url);
-        await this.PegarInfo($, Casas.ChaveDeOuro, offers, true);
-        await this.VerificarPaginasChaveDeOuro($, Casas.ChaveDeOuro, offers);
 
         return offers;
     }
