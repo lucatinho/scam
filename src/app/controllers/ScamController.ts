@@ -22,7 +22,9 @@ class ScamController {
 
     public async scam(req: Request, res: Response): Promise<any> {
         try {
-            const offers = await Scam.PegarInfoSite(Terrenos.Imperial);
+            const offers: IRealEstateOffer[] = [];
+            await Scam.PegarInfoChaveDeOuro(offers);
+            // const offers = await Scam.PegarInfoSite(Casas.Imperial);
 
             return res.status(200).send({offers});
         } catch (err) {
@@ -46,6 +48,7 @@ class ScamController {
 export class Scam {
     static async PegarInfoAllsites() {
         const offers: IRealEstateOffer[] = [];
+        await Scam.PegarInfoChaveDeOuro(offers);
         await Scam.LandelInfo(Terrenos.Landel, offers);
         await Scam.LandelInfo(Casas.Landel, offers);
         for (const site of Locais.AllSites) {
@@ -82,6 +85,21 @@ export class Scam {
         return offers;
     }
 
+    static async PegarInfoChaveDeOuro(offers: IRealEstateOffer[]) {
+        const AllChaveOuroSites: Sites[] = [Casas.ChaveDeOuro, Terrenos.ChaveDeOuro];
+
+        for (const site of AllChaveOuroSites) {
+            const $ = await this.PegarPaginaRequest(site.url);
+            await this.PegarInfo($, site, offers, true);
+            await this.VerificarPaginasChaveDeOuro($, site, offers);
+        }
+        const $ = await this.PegarPaginaRequest(Casas.ChaveDeOuro.url);
+        await this.PegarInfo($, Casas.ChaveDeOuro, offers, true);
+        await this.VerificarPaginasChaveDeOuro($, Casas.ChaveDeOuro, offers);
+
+        return offers;
+    }
+
     static async PegarInfoSite(site: Sites) {
         const offers: IRealEstateOffer[] = [];
         const $ = await this.PegarPaginaRequest(site.url);
@@ -97,13 +115,15 @@ export class Scam {
         return cheerio.load(html);
     }
 
-    static async PegarInfo($: cheerio.Root, site: Sites, offers: IRealEstateOffer[]) {
+    static async PegarInfo($: cheerio.Root, site: Sites, offers: IRealEstateOffer[], formatNeighborhood = false) {
         $(site.classes.list).each((index, element) => {
-            const neighborhood = $(element).find(site.classes.neighborhood).text();
+            let neighborhood = $(element).find(site.classes.neighborhood).text();
+            if (formatNeighborhood) {
+                neighborhood = Scam.formatarNeighborhood(neighborhood);
+            }
             const info = $(element).find(site.classes.info).text();
             const price = Scam.formatarValor($(element).find(site.classes.price).text());
             const link = $(element).find(site.classes.link).attr('href');
-
             return offers.push({
                 neighborhood,
                 info,
@@ -137,8 +157,40 @@ export class Scam {
         }
     }
 
+    static async VerificarPaginasChaveDeOuro($: cheerio.Root, site: Sites, offers: IRealEstateOffer[]) {
+        let currentLi = $('ul li.active');
+        while (currentLi.length > 0) {
+            // Pegue a próxima tag <li> após a atual
+            currentLi = currentLi.next('li');
+            if (currentLi.length > 0) {
+
+                const anchorTag = currentLi.find('a');
+                if (anchorTag.length > 0) {
+                    const numberPage = anchorTag.text();
+                    // verifica se é um numero
+                    if (/^\d+$/.test(numberPage)) {
+                        const hrefValue = site.url.replace('1', numberPage)
+                        if (hrefValue) {
+                            $ = await this.PegarPaginaRequest(hrefValue);
+                            await this.PegarInfo($, site, offers, true);
+                        }
+                    }
+                } else {
+                    console.log('Não há tag <a> dentro deste <li>.');
+                }
+            }
+        }
+    }
+
+    static formatarNeighborhood(value: string): string {
+        value = value.split(',', 1)[0];
+        value = value.replace(' ', '');
+        return value;
+    }
+
     static formatarValor(value: string): number {
         value = value.replace('VendaR$', '');
+        value = value.replace('R$', '');
         value = value.replace(/\./g, '');
         value = value.replace(/\s/g, '');
         // value = value.replace(',', '.');

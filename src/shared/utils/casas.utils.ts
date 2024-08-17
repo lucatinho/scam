@@ -2,6 +2,32 @@ import {LocalType} from "../enum/local-type.enum";
 import {Sites} from "../models/sites.model";
 
 export class Casas {
+    static readonly ChaveDeOuro: Sites = {
+        url: 'https://www.imobichavedeouro.com.br/imobiliaria/apartamento-casa-sala/imoveis/3606/1',
+        urlBase: '',
+        type: LocalType.CASA,
+        classes: {
+            list: '.c49-property-card',
+            neighborhood: '.c49-property-card_address',
+            info: '.c49-property-card_description',
+            price: '.c49-property-card_rent-price',
+            link: '.c49btn-details',
+        },
+    };
+
+    static readonly SiImoveis: Sites = {
+        url: 'https://www.si-imoveis.com.br/api/listings/a-venda/jales',
+        urlBase: 'https://www.si-imoveis.com.br',
+        type: LocalType.CASA,
+        classes: {
+            list: '.listing-results .box-align',
+            neighborhood: '.link-all .card-title',
+            info: '.link-all .value p',
+            price: '.info-left .h-money',
+            link: '.card-listing a',
+        },
+    };
+
     static readonly Landel: Sites = {
         url: 'https://www.landelimobiliaria.com.br/api/listings/a-venda/casa/jales',
         urlBase: 'https://www.landelimobiliaria.com.br',

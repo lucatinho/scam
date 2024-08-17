@@ -2,6 +2,19 @@ import {LocalType} from "../enum/local-type.enum";
 import {Sites} from "../models/sites.model";
 
 export class Terrenos {
+    static readonly ChaveDeOuro: Sites = {
+        url: 'https://www.imobichavedeouro.com.br/imobiliaria/area/imoveis/133/1',
+        urlBase: '',
+        type: LocalType.TERRENO,
+        classes: {
+            list: '.c49-property-card',
+            neighborhood: '.c49-property-card_address',
+            info: '.c49-property-card_description',
+            price: '.c49-property-card_rent-price',
+            link: '.c49btn-details',
+        },
+    };
+
     static readonly Landel: Sites = {
         url: 'https://www.landelimobiliaria.com.br/api/listings/a-venda/terreno/jales',
         urlBase: 'https://www.landelimobiliaria.com.br',
