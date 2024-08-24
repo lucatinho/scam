@@ -2,6 +2,9 @@ import {Request, Response} from "express";
 import axios from "axios";
 import cheerio from 'cheerio';
 
+import * as XLSX from 'xlsx';
+// import * as fs from 'fs';
+
 import {Locais} from "../../shared/utils/locais.utils";
 import {IRealEstateOffer} from "../../shared/interfaces/IRealEstateOffer.interface";
 import {Sites} from "../../shared/models/sites.model";
@@ -13,6 +16,27 @@ class ScamController {
     public async scamAll(req: Request, res: Response): Promise<any> {
         try {
             const offers = await Scam.PegarInfoAllsites()
+
+            return res.status(200).send({offers});
+        } catch (err) {
+            return res.status(400).send({error: 'Erro interno'});
+        }
+    }
+
+    public async scamExcel(req: Request, res: Response): Promise<any> {
+        try {
+            const offers = await Scam.PegarInfoAllsites()
+
+
+            const worksheet = XLSX.utils.json_to_sheet(offers);
+
+            const workbook = XLSX.utils.book_new();
+
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+            XLSX.writeFile(workbook, 'output.xlsx');
+
+            console.log('Arquivo Excel gerado com sucesso!');
 
             return res.status(200).send({offers});
         } catch (err) {
