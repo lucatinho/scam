@@ -71,6 +71,8 @@ class ScamController {
 }
 
 export class Scam {
+    static headerHttp = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36';
+
     static async PegarInfoAllsites() {
         const offers: IRealEstateOffer[] = [];
         await Scam.PegarInfoChaveDeOuro(offers);
@@ -81,8 +83,13 @@ export class Scam {
             const $ = await this.PegarPaginaRequest(site.url);
             await this.PegarInfo($, site, offers);
             await this.VerificarPaginas($, site, offers);
+            await Scam.delay(3000);
         }
         return offers;
+    }
+
+    static delay(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     static async ApiInfo(site: Sites, offers: IRealEstateOffer[]) {
@@ -90,7 +97,7 @@ export class Scam {
         let pageNumber = 1
 
         while (loop) {
-            const siteRequest = await axios.get(`${site.url}?ordenar=recentes&pagina=${pageNumber}`);
+            const siteRequest = await axios.get(`${site.url}?ordenar=recentes&pagina=${pageNumber}`, {headers: {'User-Agent': this.headerHttp}});
             const sitePayload = siteRequest.data;
             if (sitePayload.data[0]?.neighborhood) {
                 sitePayload.data.forEach((element: any) => {
@@ -107,6 +114,7 @@ export class Scam {
             } else {
                 loop = false;
             }
+            await Scam.delay(4000);
         }
         return offers;
     }
@@ -133,7 +141,7 @@ export class Scam {
     }
 
     static async PegarPaginaRequest(url: string) {
-        const response = await axios.get(url);
+        const response = await axios.get(url, {headers: {'User-Agent': this.headerHttp}});
         const html = response.data;
         return cheerio.load(html);
     }
@@ -177,6 +185,7 @@ export class Scam {
                     console.log('Não há tag <a> dentro deste <li>.');
                 }
             }
+            await Scam.delay(4000);
         }
     }
 
