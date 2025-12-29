@@ -42,15 +42,15 @@ export class Casas {
     };
 
     static readonly Imperial: Sites = {
-        url: 'https://www.imobimperial.com.br/p-casa-jales-.html',
-        urlBase: 'https://www.imobimperial.com.br',
+        url: 'https://www.imobimperial.com.br/retornar-imoveis-disponiveis',
+        urlBase: 'https://www.imobimperial.com.br/imovel',
         type: LocalType.CASA,
         classes: {
-            list: '.box-result-properties',
-            neighborhood: '.col-sm-8 > p:first',
+            list: '.container-busca > div > div',
+            neighborhood: '.card-body',
             info: 'ul .small-item',
-            price: '.col-sm-4 p',
-            link: '.link',
+            price: '.preco-imovel-card',
+            link: 'a',
         },
     };
 
@@ -81,7 +81,6 @@ export class Casas {
     };
 
     static readonly AllCasas: Sites[] = [
-        Casas.Imperial,
         Casas.Caiquecorretor,
         Casas.Imobglobo,
     ];

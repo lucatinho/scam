@@ -29,8 +29,8 @@ export class Terrenos {
     };
 
     static readonly Imperial: Sites = {
-        url: 'https://www.imobimperial.com.br/p-terreno-jales-.html',
-        urlBase: 'https://www.imobimperial.com.br',
+        url: 'https://www.imobimperial.com.br/retornar-imoveis-disponiveis',
+        urlBase: 'https://www.imobimperial.com.br/imovel',
         type: LocalType.TERRENO,
         classes: {
             list: '.box-result-properties',
@@ -68,7 +68,6 @@ export class Terrenos {
     };
 
     static readonly AllTerreno: Sites[] = [
-        Terrenos.Imperial,
         Terrenos.Caiquecorretor,
         Terrenos.Imobglobo,
     ];

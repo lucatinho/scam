@@ -10,6 +10,7 @@ import {IRealEstateOffer} from "../../shared/interfaces/IRealEstateOffer.interfa
 import {Sites} from "../../shared/models/sites.model";
 import {Terrenos} from "../../shared/utils/terrenos.utils";
 import {Casas} from "../../shared/utils/casas.utils";
+import {FormData} from "../../shared/utils/formdata.utils";
 
 
 class ScamController {
@@ -68,6 +69,20 @@ class ScamController {
             return res.status(400).send({error: 'Erro interno'});
         }
     }
+
+    public async ImperialScam(req: Request, res: Response): Promise<any> {
+        try {
+            const offers: IRealEstateOffer[] = [];
+            // await Scam.ApiInfoFormData(Terrenos.Imperial, offers);
+            await Scam.ApiInfoFormData(Casas.Imperial, offers, new URLSearchParams(FormData.Imperial_Casa));
+            await Scam.ApiInfoFormData(Terrenos.Imperial, offers, new URLSearchParams(FormData.Imperial_Terreno));
+            // await Scam.ApiInfo(Casas.SiImoveis, offers);
+
+            return res.status(200).send({offers});
+        } catch (err) {
+            return res.status(400).send({error: 'Erro interno'});
+        }
+    }
 }
 
 export class Scam {
@@ -75,16 +90,22 @@ export class Scam {
 
     static async PegarInfoAllsites() {
         const offers: IRealEstateOffer[] = [];
-        await Scam.PegarInfoChaveDeOuro(offers);
-        await Scam.ApiInfo(Terrenos.Landel, offers);
-        await Scam.ApiInfo(Casas.Landel, offers);
-        await Scam.ApiInfo(Casas.SiImoveis, offers);
         for (const site of Locais.AllSites) {
             const $ = await this.PegarPaginaRequest(site.url);
             await this.PegarInfo($, site, offers);
             await this.VerificarPaginas($, site, offers);
             await Scam.delay(3000);
         }
+        await Scam.PegarInfoChaveDeOuro(offers);
+        console.log('PegarInfoChaveDeOuro');
+        await Scam.ApiInfo(Terrenos.Landel, offers);
+        console.log('Landel');
+        await Scam.ApiInfo(Casas.Landel, offers);
+        console.log('Landel2');
+        await Scam.ApiInfo(Casas.SiImoveis, offers);
+        console.log('SiImoveis');
+        await Scam.ApiInfoFormData(Casas.Imperial, offers, new URLSearchParams(FormData.Imperial_Casa));
+        await Scam.ApiInfoFormData(Terrenos.Imperial, offers, new URLSearchParams(FormData.Imperial_Terreno));
         return offers;
     }
 
@@ -111,6 +132,37 @@ export class Scam {
                     });
                 });
                 pageNumber = pageNumber + 1;
+            } else {
+                loop = false;
+            }
+            await Scam.delay(4000);
+        }
+        return offers;
+    }
+
+    static async ApiInfoFormData(site: Sites, offers: IRealEstateOffer[], params: URLSearchParams) {
+        let loop = true;
+        let pageNumber = 1;
+        let qtdItens = 0;
+
+        while (loop) {
+            const siteRequest = await axios.post(`${site.url}`, params, {headers: {'User-Agent': this.headerHttp}});
+            const sitePayload = siteRequest.data;
+            if (sitePayload.lista.length) {
+                sitePayload.lista.forEach((element: any) => {
+                    offers.push({
+                        neighborhood: element.bairro,
+                        info: element?.titulo, // montar melhor
+                        price: element?.valorminimo,
+                        link: `${site.urlBase}/${element.url_amigavel}/${element.codigo}`,
+                        type: site.type,
+                        date: new Date(),
+                    });
+                });
+                pageNumber = pageNumber + 1;
+                params.set('numeropagina', String(pageNumber));
+                qtdItens = sitePayload.lista.length + qtdItens;
+                if (sitePayload.quantidade === qtdItens) loop = false;
             } else {
                 loop = false;
             }
